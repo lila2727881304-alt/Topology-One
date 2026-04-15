@@ -68,6 +68,52 @@ with st.sidebar:
     st.divider()
     st.caption("让科研更高效，让学习更快乐！")
 
+# ==========================================
+# 主页面：超极简高级横幅与四标签页架构
+# ==========================================
+# 🌟 视觉增强：超极简横幅 (Hero Banner)
+st.markdown("""
+<style>
+.hero-banner {
+    background: linear-gradient(135deg, #fbfbfd 0%, #f0f4f8 100%);
+    border-radius: 24px;
+    padding: 40px 20px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    text-align: center;
+    border: 1px solid #e5e5ea;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+.hero-title {
+    font-size: 48px; 
+    font-weight: 800;
+    background: -webkit-linear-gradient(45deg, #0071e3, #42a1f5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+.hero-subtitle {
+    font-size: 18px;
+    color: #86868b;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+@keyframes spin3D {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+}
+.rotate-logo {
+    display: inline-block;
+    animation: spin3D 4s linear infinite;
+    transform-style: preserve-3d;
+}
+</style>
+
+<div class="hero-banner">
+    <div class="hero-title"><span class="rotate-logo">♾️</span> 拓扑One</div>
+    <div class="hero-subtitle">自适应科研与学习引擎</div>
+</div>
+""", unsafe_allow_html=True)
 
 tab_chat, tab_visual, tab_course, tab_solver = st.tabs(["💬 智能问答", "📈 模型可视化演示", "📚 课程资源检索库", "📸 AI识图解题"])
 

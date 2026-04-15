@@ -99,7 +99,7 @@ with tab_chat:
     # 右侧列：替换为可以自主输入概念的展开框
     with col2:
         with st.expander("📚 讲解基本概念"):
-            concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
+            concept_query = st.text_input("输入你想了解的概念", placeholder="输入后回车...")
             if concept_query:
                 with st.spinner("正在查询专业解析..."):
                     try:

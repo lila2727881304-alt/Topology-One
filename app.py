@@ -6,7 +6,7 @@ import pandas as pd
 import time
 
 # 1. 页面全局配置
-st.set_page_config(page_title="拓扑One智能体", page_icon="♾️", layout="wide")
+st.set_page_config(page_title="♾️ 拓扑One智能体", page_icon="♾️", layout="wide")
 
 # ==========================================
 # 客户端初始化 (移至前端以便全局调用)

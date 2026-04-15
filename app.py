@@ -8,8 +8,9 @@ import pandas as pd
 st.set_page_config(page_title="拓扑One智能体", page_icon="♾️", layout="wide")
 
 # ==========================================
-# 客户端初始化
+# 客户端初始化 (移至前端以便全局调用)
 # ==========================================
+# DeepSeek 客户端（用于回答数学问题）
 client = OpenAI(
     api_key=st.secrets["DEEPSEEK_KEY"], 
     base_url="https://api.deepseek.com"
@@ -23,6 +24,7 @@ with st.sidebar:
     st.markdown("面向数学与统计学专业的深度学习辅助系统")
     st.divider()
     
+    # --- 第 1 部分：核心功能 ---
     st.subheader("💡 核心功能")
     st.markdown("- 📦 **课程与教材库**")
     
@@ -57,6 +59,7 @@ with st.sidebar:
     
     st.divider()
 
+    # --- 第 2 部分：常见应用导航 ---
     st.subheader("🚀 常见应用导航")
     st.markdown("[📚 CNKI知网 (文献检索)](https://www.cnki.net)")
     st.markdown("[📐 中国数学会 (学术动态)](https://www.cms.org.cn)")
@@ -68,10 +71,15 @@ with st.sidebar:
     st.caption("让科研更高效，让学习更快乐！")
 
 # ==========================================
-# 主页面：海报与四标签页架构
+# 主页面：三标签页架构 & 苹果便当盒海报
 # ==========================================
+st.title("♾️ 拓扑One - 智慧数学学伴AI")
+st.caption("专为数学专业大学生打造的自适应学业规划与科研辅助系统。")
+
+# 🌟 视觉增强：Apple Bento Box (苹果便当盒) 核心功能海报
 st.markdown("""
 <style>
+/* 定义便当盒外层网格 */
 .bento-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -80,6 +88,7 @@ st.markdown("""
     margin-bottom: 30px;
     margin-top: 20px;
 }
+/* 定义每一个独立的小盒子 */
 .bento-box {
     background: #fbfbfd;
     border-radius: 24px;
@@ -135,6 +144,7 @@ st.markdown("""
     font-size: 80px;
     opacity: 0.1;
 }
+/* 🎯 莫比乌斯环 3D 旋转动画 */
 @keyframes spin3D {
     0% { transform: rotateY(0deg); }
     100% { transform: rotateY(360deg); }
@@ -169,8 +179,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 💡 注意这里新增了第四个标签页！
-tab_chat, tab_visual, tab_course, tab_solver = st.tabs(["💬 智能问答", "📈 模型可视化演示", "📚 课程资源检索库", "📸 AI拍照搜题"])
+tab_chat, tab_visual, tab_course = st.tabs(["💬 智能问答", "📈 模型可视化演示", "📚 课程资源检索库"])
 
 # ------------------------------------------
 # 标签页 1：智能问答
@@ -181,6 +190,7 @@ with tab_chat:
         st.session_state.quick_prompt = None
 
     col1, col2 = st.columns(2)
+    
     with col1:
         if st.button("🔍 查询高等代数课程推荐教材", use_container_width=True):
             st.session_state.quick_prompt = "请帮我查询数学专业高等代数的经典推荐教材，并给出学习该课程的重点建议。"
@@ -313,77 +323,3 @@ with tab_course:
         })
     except:
         st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传至仓库。")
-
-# ------------------------------------------
-# 标签页 4：拍照搜题 (全新功能)
-# ------------------------------------------
-with tab_solver:
-    st.markdown("### 📸 拓扑One 核心矿山：拍照与截图识题")
-    
-    # 状态管理：记录用户当前选择了哪个数学工具
-    if "solver_mode" not in st.session_state:
-        st.session_state.solver_mode = None
-
-    if st.session_state.solver_mode is None:
-        st.info("👇 请先选择你要解答的题目大类，然后调用摄像头拍照或上传图片。")
-        
-        with st.container(border=True):
-            st.markdown("#### 📐 微积分")
-            c1, c2, c3, c4 = st.columns(4)
-            if c1.button("∫ 不定积分", use_container_width=True): st.session_state.solver_mode = "不定积分"
-            if c2.button("∬ 二重积分", use_container_width=True): st.session_state.solver_mode = "二重积分"
-            if c3.button("∂ 微分方程", use_container_width=True): st.session_state.solver_mode = "微分方程"
-            if c4.button("lim 极限计算", use_container_width=True): st.session_state.solver_mode = "极限计算"
-
-        with st.container(border=True):
-            st.markdown("#### 🧮 线性代数")
-            c5, c6, c7, c8 = st.columns(4)
-            if c5.button("[A]ᵀ 矩阵转置", use_container_width=True): st.session_state.solver_mode = "矩阵转置"
-            if c6.button("|A| 行列式", use_container_width=True): st.session_state.solver_mode = "行列式计算"
-            if c7.button("R(A) 矩阵的秩", use_container_width=True): st.session_state.solver_mode = "矩阵的秩"
-            if c8.button("λ 特征值与向量", use_container_width=True): st.session_state.solver_mode = "特征值与特征向量"
-
-    else:
-        # 进入拍照/上传模式
-        col_back, _ = st.columns([1, 4])
-        if col_back.button("⬅️ 返回更换题型"):
-            st.session_state.solver_mode = None
-            st.rerun()
-            
-        st.markdown(f"#### 当前选定题型：**{st.session_state.solver_mode}**")
-        st.caption("请对准题目拍照，或从相册上传截图。AI 将自动识别并给出详细解题步骤。")
-        
-        # 核心：调用设备的摄像头 (手机端可直接开启后置摄像头)
-        solve_image = st.camera_input("📸 点击拍照")
-        
-        # 如果用户不想拍照，也可以提供本地上传选项
-        if not solve_image:
-            solve_image = st.file_uploader("或选择本地图片上传", type=["png", "jpg", "jpeg"], key="solver_upload")
-            
-        if solve_image is not None:
-            if st.button("✨ 提交并开始智能解答", type="primary", use_container_width=True):
-                with st.spinner(f"正在调动视觉大模型解析【{st.session_state.solver_mode}】题目，请稍候..."):
-                    try:
-                        img_data = solve_image.getvalue()
-                        base64_image = base64.b64encode(img_data).decode('utf-8')
-                        zhipu_api_key = st.secrets["ZHIPU_KEY"]
-                        vision_client = OpenAI(
-                            api_key=zhipu_api_key,
-                            base_url="https://open.bigmodel.cn/api/paas/v4/"
-                        )
-                        # 定制化 Prompt：让 AI 扮演该题型的专家并输出标准公式
-                        prompt_text = f"你是一个精通【{st.session_state.solver_mode}】的大学数学教授。请识别图片中的数学题目，并给出极其详细的、一步一步的解答过程。所有的数学公式必须使用标准的 Markdown LaTeX 语法，行内公式用单个 $ 包裹，独立公式用双 $$ 包裹。绝不能带有任何乱码。"
-                        response = vision_client.chat.completions.create(
-                            model="glm-4v",
-                            messages=[{
-                                "role": "user",
-                                "content": [
-                                    {"type": "text", "text": prompt_text},
-                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                                ]
-                            }]
-                        )
-                        st.success("解答完成！以下是详细步骤：")
-                        st.markdown(response.choices[0].message.content)
-                    except Exception as e:
-                        st.error(f"解析失败，请检查配置。")

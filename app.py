@@ -17,24 +17,14 @@ client = OpenAI(
 )
 
 # ==========================================
-# 侧边栏：资源导航与 LaTeX 识别工具
+# 侧边栏：资源导航与 LaTeX 识别工具 (已调换顺序)
 # ==========================================
 with st.sidebar:
     st.title("♾️ 拓扑One")
     st.markdown("面向数学与统计学专业的深度学习辅助系统")
     st.divider()
     
-    # 模块：常见应用导航
-    st.subheader("🚀 常见应用导航")
-    st.markdown("[📚 CNKI知网 (文献检索)](https://www.cnki.net)")
-    st.markdown("[📐 中国数学会 (学术动态)](https://www.cms.org.cn)")
-    st.markdown("[🌐 中国大学MOOC (在线课程)](https://www.icourse163.org)")
-    st.markdown("[📊 数学建模网 (CUMCM资源)](http://www.mcm.edu.cn)")
-    st.markdown("[🏫 学科网 (教学资源)](https://www.zxxk.com)")
-    
-    st.divider()
-    
-    # 模块：核心功能
+    # --- 第 1 部分：核心功能 (移到最上方) ---
     st.subheader("💡 核心功能")
     st.markdown("- 📦 **课程与教材库**")
     
@@ -66,6 +56,16 @@ with st.sidebar:
                         st.code(response.choices[0].message.content, language="latex")
                     except:
                         st.error("识别出错，请检查配置。")
+    
+    st.divider()
+
+    # --- 第 2 部分：常见应用导航 (移到下方) ---
+    st.subheader("🚀 常见应用导航")
+    st.markdown("[📚 CNKI知网 (文献检索)](https://www.cnki.net)")
+    st.markdown("[📐 中国数学会 (学术动态)](https://www.cms.org.cn)")
+    st.markdown("[🌐 中国大学MOOC (在线课程)](https://www.icourse163.org)")
+    st.markdown("[📊 数学建模网 (CUMCM资源)](http://www.mcm.edu.cn)")
+    st.markdown("[🏫 学科网 (教学资源)](https://www.zxxk.com)")
     
     st.divider()
     st.caption("让科研更高效，让学习更快乐！")

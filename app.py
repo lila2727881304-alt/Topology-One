@@ -38,7 +38,6 @@ with st.sidebar:
     st.subheader("💡 核心功能")
     st.markdown("- 📦 **课程与教材库**")
     
-    # 功能 A：LaTeX识别
     with st.expander("∑ LaTeX公式识别 (点击上传图片)"):
         zhipu_api_key = st.secrets["ZHIPU_KEY"]
         uploaded_image = st.file_uploader("支持截图或拍照上传", type=["png", "jpg", "jpeg"], key="sidebar_latex")
@@ -90,19 +89,45 @@ with tab_chat:
     # 创建两列，实现 2x2 对称布局
     col1, col2 = st.columns(2)
     
-    # 第一行：左边按钮1，右边展开框
+    # 第一列：左侧
     with col1:
-        if st.button("🔍 查询大二上学期《拓扑学》推荐教材", use_container_width=True):
-            st.session_state.quick_prompt = "请帮我查询数学专业大二上学期《拓扑学》的经典推荐教材，并给出学习该课程的重点建议。"
+        if st.button("🔍 查询高等代数课程推荐教材", use_container_width=True):
+            st.session_state.quick_prompt = "请帮我查询数学专业高等代数的经典推荐教材，并给出学习该课程的重点建议。"
         if st.button("🧠 从《数学分析》到《实变函数》怎么过渡？", use_container_width=True):
             st.session_state.quick_prompt = "请从核心思想的角度，讲解如何从数学分析平滑过渡到实变函数学习。"
     
+    # 第二列：右侧
     with col2:
-           if st.button("🏆 全国大学生数学建模竞赛(CUMCM)备考路线", use_container_width=True):
+        # 上面：数学建模按钮
+        if st.button("🏆 全国大学生数学建模竞赛(CUMCM)备考路线", use_container_width=True):
             st.session_state.quick_prompt = "请为数学专业的学生制定一份为期三个月的全国大学生数学建模竞赛（CUMCM）备考计划。要求：1. 分月细化任务（基础、进阶、模拟）；2. 列出核心算法模型；3. 公式使用 $ 渲染。"
+        
+        # 下面：讲解基本概念的交互框
+        with st.expander("📚 讲解基本概念"):
+            concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
+            if concept_query:
+                with st.spinner("正在查询专业解析..."):
+                    try:
+                        sde_response = client.chat.completions.create(
+                            model="deepseek-chat",
+                            messages=[
+                                {
+                                    "role": "system", 
+                                    "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨、通俗的解答，绝对不要说废话。数学公式必须严格使用 Markdown 的 LaTeX 语法，行内公式用单个 $ 包裹，独立公式用双 $$ 包裹。绝对禁止使用 \\( \\) 或 \\[ \\] 格式。"
+                                },
+                                {
+                                    "role": "user", 
+                                    "content": f"请详细且精炼地讲解这个概念：{concept_query}"
+                                }
+                            ]
+                        )
+                        st.info(sde_response.choices[0].message.content)
+                    except:
+                        st.error("解析失败，请检查 API 配置。")
 
     st.divider()
 
+    # 以下是主聊天框的逻辑
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant", "content": "你好！我是你的**拓扑One**导师。无论是拓扑学难点、随机过程公式，还是科研论文排版，我都能为你提供专业的指导。今天想探讨什么？"}
@@ -142,30 +167,6 @@ with tab_chat:
                     st.session_state.messages.append({"role": "assistant", "content": ai_answer})
                 except:
                     st.error("对话失败。请检查 API 配置。")
-                    
-        with st.expander("📚 讲解基本概念"):
-            concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
-            if concept_query:
-                with st.spinner("正在查询专业解析..."):
-                    try:
-                        sde_response = client.chat.completions.create(
-                            model="deepseek-chat",
-                            messages=[
-                                {
-                                    "role": "system", 
-                                    "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨、通俗的解答，绝对不要说废话。数学公式必须严格使用 Markdown 的 LaTeX 语法，行内公式用单个 $ 包裹，独立公式用双 $$ 包裹。绝对禁止使用 \\( \\) 或 \\[ \\] 格式。"
-                                },
-                                {
-                                    "role": "user", 
-                                    "content": f"请详细且精炼地讲解这个概念：{concept_query}"
-                                }
-                            ]
-                        )
-                        st.info(sde_response.choices[0].message.content)
-                    except:
-                        st.error("解析失败，请检查 API 配置。")
-        
-    
 
 # ------------------------------------------
 # 标签页 2：模型可视化

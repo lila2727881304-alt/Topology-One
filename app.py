@@ -87,19 +87,19 @@ with tab_chat:
     if "quick_prompt" not in st.session_state:
         st.session_state.quick_prompt = None
 
+    # 创建两列，实现 2x2 对称布局
     col1, col2 = st.columns(2)
     
-    # 左侧列：保留两个固定的快捷问题按钮
+    # 第一行：左边按钮1，右边展开框
     with col1:
         if st.button("🔍 查询大二上学期《拓扑学》推荐教材", use_container_width=True):
             st.session_state.quick_prompt = "请帮我查询数学专业大二上学期《拓扑学》的经典推荐教材，并给出学习该课程的重点建议。"
         if st.button("🧠 从《数学分析》到《实变函数》怎么过渡？", use_container_width=True):
             st.session_state.quick_prompt = "请从核心思想的角度，讲解如何从数学分析平滑过渡到实变函数学习。"
     
-    # 右侧列：替换为可以自主输入概念的展开框
     with col2:
         with st.expander("📚 讲解基本概念"):
-            concept_query = st.text_input("输入你想了解的概念", placeholder="输入后回车...")
+            concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
             if concept_query:
                 with st.spinner("正在查询专业解析..."):
                     try:
@@ -108,7 +108,7 @@ with tab_chat:
                             messages=[
                                 {
                                     "role": "system", 
-                                    "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨、通俗的解答，绝对不要使用任何诸如'作为一名数学教授'或'我很乐意为你解答'之类的开场白废话。重要格式要求：所有数学公式必须严格使用 Markdown 的 LaTeX 语法，行内公式用单个 $ 包裹（例如 $f(x)$），独立公式用双 $$ 包裹。绝对禁止使用 \\( \\) 或 \\[ \\] 格式输出公式。"
+                                    "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨、通俗的解答，绝对不要说废话。数学公式必须严格使用 Markdown 的 LaTeX 语法，行内公式用单个 $ 包裹，独立公式用双 $$ 包裹。绝对禁止使用 \\( \\) 或 \\[ \\] 格式。"
                                 },
                                 {
                                     "role": "user", 
@@ -119,6 +119,10 @@ with tab_chat:
                         st.info(sde_response.choices[0].message.content)
                     except:
                         st.error("解析失败，请检查 API 配置。")
+        
+        # 方案 C：新增的建模按钮，与 col1 的第二个按钮对齐
+        if st.button("🏆 全国大学生数学建模竞赛(CUMCM)备考路线", use_container_width=True):
+            st.session_state.quick_prompt = "请为数学专业的学生制定一份为期三个月的全国大学生数学建模竞赛（CUMCM）备考计划。要求：1. 分月细化任务（基础、进阶、模拟）；2. 列出核心算法模型；3. 公式使用 $ 渲染。"
 
     st.divider()
 
@@ -143,11 +147,11 @@ with tab_chat:
         with st.chat_message("assistant"):
             with st.spinner("系统正在进行多维度逻辑推理..."):
                 try:
-                    # 在主对话中也加入严格格式要求的 System Prompt
+                    # 严格格式要求
                     strict_messages = [
                         {
                             "role": "system",
-                            "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨、通俗的解答，不要说废话。数学公式必须严格使用 Markdown 的 LaTeX 语法，行内公式用单个 $ 包裹，独立公式用双 $$ 包裹。绝对禁止使用 \\( \\) 或 \\[ \\] 格式。"
+                            "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨解答，不要说废话。数学公式必须严格使用 $ 包裹行内公式，$$ 包裹独立公式。绝对禁止使用 \\( 或 \\[。"
                         }
                     ] + st.session_state.messages
                     

@@ -3,6 +3,7 @@ from openai import OpenAI
 import base64
 import numpy as np
 import pandas as pd
+import time
 
 # 1. 页面全局配置
 st.set_page_config(page_title="拓扑One智能体", page_icon="♾️", layout="wide")
@@ -314,10 +315,10 @@ with tab_course:
         st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传至仓库。")
 
 # ------------------------------------------
-# 标签页 4：拍照搜题 (终极防错答题模板版)
+# 标签页 4：拍照搜题 (终极多模型编排架构版)
 # ------------------------------------------
 with tab_solver:
-    st.markdown("### 📸 拓扑One 核心矿山：分发识题系统")
+    st.markdown("### 📸 拓扑One 核心矿山：多模型联合解题系统")
     
     if "solver_mode" not in st.session_state:
         st.session_state.solver_mode = None
@@ -348,55 +349,73 @@ with tab_solver:
             st.rerun()
             
         st.markdown(f"#### 当前选定题型：**{st.session_state.solver_mode}**")
-        st.caption("请选择题目图片上传。如使用手机访问，点击下方区域可直接拍照。")
+        st.caption("采用 VLM视觉感知 + LLM深度推理 双引擎。请选择题目图片上传。")
         
         solve_image = st.file_uploader("支持截图或拍照上传", type=["png", "jpg", "jpeg"], key="solver_upload")
             
         if solve_image is not None:
-            if st.button("✨ 提交并开始智能解答", type="primary", use_container_width=True):
-                with st.spinner(f"正在调动视觉大模型解析【{st.session_state.solver_mode}】题目，请稍候..."):
-                    try:
-                        img_data = solve_image.getvalue()
-                        base64_image = base64.b64encode(img_data).decode('utf-8')
-                        zhipu_api_key = st.secrets["ZHIPU_KEY"]
-                        vision_client = OpenAI(
-                            api_key=zhipu_api_key,
-                            base_url="https://open.bigmodel.cn/api/paas/v4/"
-                        )
-                        
-                        # 💥 【终极杀手锏：强制填空模板】
-                        # 我们直接告诉模型：如果你不按照这个带有中文说明的模板回答，你就死定了。
-                        prompt_text = f"""你是一名资深的大学数学教授，精通【{st.session_state.solver_mode}】。
-                        请解答图片中的数学题。你必须严格按照以下模板结构输出你的回答，确保文字解说和公式交替出现：
-
-                        **【题目分析】**
-                        (在这里用一句话指出题目的考点或核心公式)
-
-                        **【详细推导步骤】**
-                        (在这里一步一步写出计算过程。每一步都要有中文文字说明！绝对不要只扔出一大段代码！公式两边必须用 $ 包裹，例如：由于 $x=2$，可以推导出 $y=4$。)
-
-                        **【最终答案】**
-                        (在这里写出最终结果，同样用 $ 包裹)
-
-                        注意：绝对不要使用 <answer> 或 </answer> 等XML标签！
-                        """
-                        
-                        response = vision_client.chat.completions.create(
-                            model="glm-4v",
-                            messages=[{
-                                "role": "user",
-                                "content": [
-                                    {"type": "text", "text": prompt_text},
-                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                                ]
-                            }]
-                        )
-                        
-                        # 清洗可能残留的坏标签
-                        raw_ans = response.choices[0].message.content
-                        clean_ans = raw_ans.replace("<answer>", "").replace("</answer>", "").replace("```latex", "").replace("```", "").strip()
-                        
-                        st.success("解答完成！以下是详细步骤：")
-                        st.markdown(clean_ans)
-                    except Exception as e:
-                        st.error(f"解析失败，请检查配置。")
+            if st.button("✨ 提交并启动联合解码解答", type="primary", use_container_width=True):
+                
+                # 初始化状态显示
+                status_placeholder = st.empty()
+                
+                try:
+                    img_data = solve_image.getvalue()
+                    base64_image = base64.b64encode(img_data).decode('utf-8')
+                    zhipu_api_key = st.secrets["ZHIPU_KEY"]
+                    vision_client = OpenAI(
+                        api_key=zhipu_api_key,
+                        base_url="https://open.bigmodel.cn/api/paas/v4/"
+                    )
+                    
+                    # ======= 第一棒：视觉模型只做 OCR 提取，不许做题 =======
+                    status_placeholder.info("👁️ 正在调用视觉模型 (GLM-4V) 提取图像中的数学特征...")
+                    
+                    ocr_prompt = "请仅仅提取图片中的数学题目公式，将其转换为标准的一行 LaTeX 代码。绝对不要尝试解答这道题，不要任何说明文字，只要代码本身。"
+                    ocr_response = vision_client.chat.completions.create(
+                        model="glm-4v",
+                        messages=[{
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": ocr_prompt},
+                                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                            ]
+                        }]
+                    )
+                    
+                    # 拿到干净的公式代码
+                    equation_latex = ocr_response.choices[0].message.content.replace("```latex", "").replace("```", "").replace("<answer>", "").replace("</answer>", "").strip()
+                    
+                    # ======= 第二棒：数学大脑 DeepSeek 根据代码做题 =======
+                    status_placeholder.success(f"✅ 提取成功！识别方程为: $ {equation_latex} $ \n\n🧠 正在交由 DeepSeek 数学逻辑引擎进行深度推导...")
+                    
+                    solve_prompt = f"""你是一名资深的大学数学教授，精通【{st.session_state.solver_mode}】。
+                    请解答以下数学题（它是从图片中提取出的 LaTeX 公式）：
+                    $$ {equation_latex} $$
+                    
+                    请务必遵守以下规范：
+                    1. 严格使用以下模板结构，并且包含中文文字说明：
+                    **【题目分析】**
+                    (一句话指出核心考点)
+                    **【详细推导步骤】**
+                    (一步一步写出计算过程。每一步必须有中文解说。公式两边必须用 $ 包裹，例如：$y=x^2$。独立成行的长公式用 $$ 包裹。)
+                    **【最终答案】**
+                    (写出最终结果，用 $$ 包裹)
+                    
+                    2. 绝对禁止输出 <answer> 或 </answer> 这种 XML 标签。
+                    """
+                    
+                    solve_response = client.chat.completions.create(
+                        model="deepseek-chat",
+                        messages=[{"role": "user", "content": solve_prompt}]
+                    )
+                    
+                    clean_ans = solve_response.choices[0].message.content.replace("<answer>", "").replace("</answer>", "").strip()
+                    
+                    # 清除状态，展示最终完美答案
+                    status_placeholder.empty()
+                    st.success("解答完成！以下是数学逻辑引擎的推导步骤：")
+                    st.markdown(clean_ans)
+                    
+                except Exception as e:
+                    status_placeholder.error(f"解析过程中发生错误，请检查 API 配置或网络。")

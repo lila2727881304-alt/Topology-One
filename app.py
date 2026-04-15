@@ -314,7 +314,7 @@ with tab_course:
         st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传至仓库。")
 
 # ------------------------------------------
-# 标签页 4：拍照搜题 (解决公式渲染错误版)
+# 标签页 4：拍照搜题 (终极防错答题模板版)
 # ------------------------------------------
 with tab_solver:
     st.markdown("### 📸 拓扑One 核心矿山：分发识题系统")
@@ -364,17 +364,21 @@ with tab_solver:
                             base_url="https://open.bigmodel.cn/api/paas/v4/"
                         )
                         
-                        # 💥 【终极防乱码提示词】
-                        prompt_text = f"""你是一位精通【{st.session_state.solver_mode}】的大学数学教授。请识别图片中的数学题并给出详细的解题步骤。
-                        【极其重要的排版警告】：
-                        1. 绝对不要使用 <answer> 或 </answer> 这种 XML 标签来包裹答案！直接输出纯文本。
-                        2. 所有的多行公式推导（如 \\begin{{aligned}}...\\end{{aligned}}）必须且只能用 $$ 包裹在最外层！不要让 \\begin 裸奔！
-                        3. 正确格式示范：
-                        $$
-                        \\begin{{aligned}}
-                        \\int x dx &= \\frac{{1}}{{2}}x^2 + C \\\\
-                        \\end{{aligned}}
-                        $$
+                        # 💥 【终极杀手锏：强制填空模板】
+                        # 我们直接告诉模型：如果你不按照这个带有中文说明的模板回答，你就死定了。
+                        prompt_text = f"""你是一名资深的大学数学教授，精通【{st.session_state.solver_mode}】。
+                        请解答图片中的数学题。你必须严格按照以下模板结构输出你的回答，确保文字解说和公式交替出现：
+
+                        **【题目分析】**
+                        (在这里用一句话指出题目的考点或核心公式)
+
+                        **【详细推导步骤】**
+                        (在这里一步一步写出计算过程。每一步都要有中文文字说明！绝对不要只扔出一大段代码！公式两边必须用 $ 包裹，例如：由于 $x=2$，可以推导出 $y=4$。)
+
+                        **【最终答案】**
+                        (在这里写出最终结果，同样用 $ 包裹)
+
+                        注意：绝对不要使用 <answer> 或 </answer> 等XML标签！
                         """
                         
                         response = vision_client.chat.completions.create(
@@ -388,7 +392,7 @@ with tab_solver:
                             }]
                         )
                         
-                        # 💥 【清洗过滤网】：强行干掉 AI 发疯时可能带上的标签
+                        # 清洗可能残留的坏标签
                         raw_ans = response.choices[0].message.content
                         clean_ans = raw_ans.replace("<answer>", "").replace("</answer>", "").replace("```latex", "").replace("```", "").strip()
                         

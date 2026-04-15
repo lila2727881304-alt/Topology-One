@@ -76,7 +76,9 @@ with st.sidebar:
 st.title("♾️ 拓扑One - 智慧数学学伴AI")
 st.caption("专为数学专业大学生打造的自适应学业规划与科研辅助系统。")
 
+# ==========================================
 # 🌟 视觉增强：Apple Bento Box (苹果便当盒) 核心功能海报
+# ==========================================
 st.markdown("""
 <style>
 /* 定义便当盒外层网格 */
@@ -144,11 +146,22 @@ st.markdown("""
     font-size: 80px;
     opacity: 0.1;
 }
+
+/* 🎯 新增：莫比乌斯环 3D 旋转动画 */
+@keyframes spin3D {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+}
+.rotate-logo {
+    display: inline-block;
+    animation: spin3D 4s linear infinite; /* 4秒转一圈，匀速无限循环 */
+    transform-style: preserve-3d;
+}
 </style>
 
 <div class="bento-container">
     <div class="bento-box box-large">
-        <div class="large-title">♾️ 拓扑One</div>
+        <div class="large-title"><span class="rotate-logo">♾️</span> 拓扑One</div>
         <div class="bento-desc" style="font-size: 16px;">专为数学专业打造的<br>自适应科研与学习引擎</div>
     </div>
     <div class="bento-box box-wide">

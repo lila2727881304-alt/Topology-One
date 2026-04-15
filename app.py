@@ -176,7 +176,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 💡 注意：恢复了第四个标签页！
 tab_chat, tab_visual, tab_course, tab_solver = st.tabs(["💬 智能问答", "📈 模型可视化演示", "📚 课程资源检索库", "📸 AI识图解题"])
 
 # ------------------------------------------
@@ -328,7 +327,6 @@ with tab_course:
 with tab_solver:
     st.markdown("### 📸 拓扑One 核心矿山：分发识题系统")
     
-    # 状态管理：记录用户当前选择了哪个数学工具
     if "solver_mode" not in st.session_state:
         st.session_state.solver_mode = None
 
@@ -352,7 +350,6 @@ with tab_solver:
             if c8.button("λ 特征值与向量", use_container_width=True): st.session_state.solver_mode = "特征值与特征向量"
 
     else:
-        # 进入文件上传模式（手机端点击会自动弹起“拍照/图库”选项）
         col_back, _ = st.columns([1, 4])
         if col_back.button("⬅️ 返回更换题型"):
             st.session_state.solver_mode = None
@@ -374,8 +371,15 @@ with tab_solver:
                             api_key=zhipu_api_key,
                             base_url="https://open.bigmodel.cn/api/paas/v4/"
                         )
-                        # 添加了防幻觉的提示词
-                        prompt_text = f"你是一个精通【{st.session_state.solver_mode}】的大学数学教授。请识别图片中的数学题目。如果题目计算极其复杂，请侧重于给出清晰的解题思路、步骤框架和核心公式，避免直接心算导致的错误。所有的数学公式必须使用标准的 Markdown LaTeX 语法，行内公式用单个 $ 包裹，独立公式用双 $$ 包裹。绝不能带有任何乱码。"
+                        
+                        # 💥 【核心修复】：防乱码、强迫详细解答的超级提示词
+                        prompt_text = f"""你是一位精通【{st.session_state.solver_mode}】的数学教授。请直接解答图片中的数学题。
+                        必须严格遵守以下规则：
+                        1. 不要单纯把题目转成代码，我需要的是【详细的解题步骤】和【最终答案】。
+                        2. 遇到复杂计算，请分段写出推导逻辑，不要直接跳步。
+                        3. 公式排版：行内公式严格用单个 $ 包裹（例如：$f(x)=x^2$），独立成行的公式严格用双 $$ 包裹（例如：$$ y = mx + b $$）。绝对不能漏掉前面的 $ 符号！
+                        4. 绝对禁止使用 \\( \\) 或 \\[ \\] 这类括号来包裹公式。
+                        """
                         
                         response = vision_client.chat.completions.create(
                             model="glm-4v",

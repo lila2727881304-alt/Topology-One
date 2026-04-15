@@ -98,30 +98,7 @@ with tab_chat:
             st.session_state.quick_prompt = "请从核心思想的角度，讲解如何从数学分析平滑过渡到实变函数学习。"
     
     with col2:
-        with st.expander("📚 讲解基本概念"):
-            concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
-            if concept_query:
-                with st.spinner("正在查询专业解析..."):
-                    try:
-                        sde_response = client.chat.completions.create(
-                            model="deepseek-chat",
-                            messages=[
-                                {
-                                    "role": "system", 
-                                    "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨、通俗的解答，绝对不要说废话。数学公式必须严格使用 Markdown 的 LaTeX 语法，行内公式用单个 $ 包裹，独立公式用双 $$ 包裹。绝对禁止使用 \\( \\) 或 \\[ \\] 格式。"
-                                },
-                                {
-                                    "role": "user", 
-                                    "content": f"请详细且精炼地讲解这个概念：{concept_query}"
-                                }
-                            ]
-                        )
-                        st.info(sde_response.choices[0].message.content)
-                    except:
-                        st.error("解析失败，请检查 API 配置。")
-        
-        # 方案 C：新增的建模按钮，与 col1 的第二个按钮对齐
-        if st.button("🏆 全国大学生数学建模竞赛(CUMCM)备考路线", use_container_width=True):
+           if st.button("🏆 全国大学生数学建模竞赛(CUMCM)备考路线", use_container_width=True):
             st.session_state.quick_prompt = "请为数学专业的学生制定一份为期三个月的全国大学生数学建模竞赛（CUMCM）备考计划。要求：1. 分月细化任务（基础、进阶、模拟）；2. 列出核心算法模型；3. 公式使用 $ 渲染。"
 
     st.divider()
@@ -165,6 +142,30 @@ with tab_chat:
                     st.session_state.messages.append({"role": "assistant", "content": ai_answer})
                 except:
                     st.error("对话失败。请检查 API 配置。")
+                    
+        with st.expander("📚 讲解基本概念"):
+            concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
+            if concept_query:
+                with st.spinner("正在查询专业解析..."):
+                    try:
+                        sde_response = client.chat.completions.create(
+                            model="deepseek-chat",
+                            messages=[
+                                {
+                                    "role": "system", 
+                                    "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨、通俗的解答，绝对不要说废话。数学公式必须严格使用 Markdown 的 LaTeX 语法，行内公式用单个 $ 包裹，独立公式用双 $$ 包裹。绝对禁止使用 \\( \\) 或 \\[ \\] 格式。"
+                                },
+                                {
+                                    "role": "user", 
+                                    "content": f"请详细且精炼地讲解这个概念：{concept_query}"
+                                }
+                            ]
+                        )
+                        st.info(sde_response.choices[0].message.content)
+                    except:
+                        st.error("解析失败，请检查 API 配置。")
+        
+    
 
 # ------------------------------------------
 # 标签页 2：模型可视化

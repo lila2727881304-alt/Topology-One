@@ -71,7 +71,7 @@ with st.sidebar:
 # ==========================================
 # 主页面：海报与四标签页架构
 # ==========================================
-# 🌟 视觉增强：极简版 Apple Bento Box (只留标题，完美居中)
+# 🌟 视觉增强：极简版 Apple Bento Box (纯标题，几何居中)
 st.markdown("""
 <style>
 .bento-container {
@@ -89,8 +89,8 @@ st.markdown("""
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
-    justify-content: center; /* 水平居中 */
-    align-items: center;     /* 垂直居中 */
+    justify-content: center; /* 水平绝对居中 */
+    align-items: center;     /* 垂直绝对居中 */
     flex-direction: column;
     border: 1px solid #e5e5ea;
     overflow: hidden;
@@ -111,17 +111,18 @@ st.markdown("""
     background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
 }
 .bento-title {
-    font-size: 22px; /* 加大字号 */
+    font-size: 22px; 
     font-weight: 700;
     color: #1d1d1f;
+    margin: 0; /* 强制清空外边距以保证绝对居中 */
 }
 .large-title {
-    font-size: 42px; /* 加大主标题字号 */
+    font-size: 42px; 
     font-weight: 800;
     background: -webkit-linear-gradient(45deg, #0071e3, #42a1f5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 5px;
+    margin: 0; /* 强制清空外边距以保证绝对居中 */
 }
 @keyframes spin3D {
     0% { transform: rotateY(0deg); }
@@ -137,7 +138,6 @@ st.markdown("""
 <div class="bento-container">
     <div class="bento-box box-large">
         <div class="large-title"><span class="rotate-logo">♾️</span> 拓扑One</div>
-        <div style="font-size: 16px; color: #86868b; font-weight: 500;">自适应科研与学习引擎</div>
     </div>
     <div class="bento-box box-wide">
         <div class="bento-title">∑ 多模态 LaTeX 极速识别</div>

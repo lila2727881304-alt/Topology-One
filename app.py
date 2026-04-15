@@ -10,7 +10,6 @@ st.set_page_config(page_title="拓扑One智能体", page_icon="♾️", layout="
 # ==========================================
 # 客户端初始化 (移至前端以便全局调用)
 # ==========================================
-# DeepSeek 客户端（用于回答数学问题）
 client = OpenAI(
     api_key=st.secrets["DEEPSEEK_KEY"], 
     base_url="https://api.deepseek.com"
@@ -24,7 +23,6 @@ with st.sidebar:
     st.markdown("面向数学与统计学专业的深度学习辅助系统")
     st.divider()
     
-    # --- 第 1 部分：核心功能 ---
     st.subheader("💡 核心功能")
     st.markdown("- 📦 **课程与教材库**")
     
@@ -59,7 +57,6 @@ with st.sidebar:
     
     st.divider()
 
-    # --- 第 2 部分：常见应用导航 ---
     st.subheader("🚀 常见应用导航")
     st.markdown("[📚 CNKI知网 (文献检索)](https://www.cnki.net)")
     st.markdown("[📐 中国数学会 (学术动态)](https://www.cms.org.cn)")
@@ -71,12 +68,8 @@ with st.sidebar:
     st.caption("让科研更高效，让学习更快乐！")
 
 # ==========================================
-# 主页面：三标签页架构 & 苹果便当盒海报
+# 主页面：海报与四标签页架构
 # ==========================================
-st.title("♾️ 拓扑One - 智慧数学学伴AI")
-st.caption("专为数学专业大学生打造的自适应学业规划与科研辅助系统。")
-
-# 🌟 视觉增强：Apple Bento Box (苹果便当盒) 核心功能海报
 st.markdown("""
 <style>
 .bento-container {
@@ -187,7 +180,6 @@ with tab_chat:
         st.session_state.quick_prompt = None
 
     col1, col2 = st.columns(2)
-    
     with col1:
         if st.button("🔍 查询高等代数课程推荐教材", use_container_width=True):
             st.session_state.quick_prompt = "请帮我查询数学专业高等代数的经典推荐教材，并给出学习该课程的重点建议。"
@@ -322,7 +314,7 @@ with tab_course:
         st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传至仓库。")
 
 # ------------------------------------------
-# 标签页 4：拍照搜题 (无弹窗纯上传版)
+# 标签页 4：拍照搜题 (解决公式渲染错误版)
 # ------------------------------------------
 with tab_solver:
     st.markdown("### 📸 拓扑One 核心矿山：分发识题系统")
@@ -372,13 +364,17 @@ with tab_solver:
                             base_url="https://open.bigmodel.cn/api/paas/v4/"
                         )
                         
-                        # 💥 【核心修复】：防乱码、强迫详细解答的超级提示词
-                        prompt_text = f"""你是一位精通【{st.session_state.solver_mode}】的数学教授。请直接解答图片中的数学题。
-                        必须严格遵守以下规则：
-                        1. 不要单纯把题目转成代码，我需要的是【详细的解题步骤】和【最终答案】。
-                        2. 遇到复杂计算，请分段写出推导逻辑，不要直接跳步。
-                        3. 公式排版：行内公式严格用单个 $ 包裹（例如：$f(x)=x^2$），独立成行的公式严格用双 $$ 包裹（例如：$$ y = mx + b $$）。绝对不能漏掉前面的 $ 符号！
-                        4. 绝对禁止使用 \\( \\) 或 \\[ \\] 这类括号来包裹公式。
+                        # 💥 【终极防乱码提示词】
+                        prompt_text = f"""你是一位精通【{st.session_state.solver_mode}】的大学数学教授。请识别图片中的数学题并给出详细的解题步骤。
+                        【极其重要的排版警告】：
+                        1. 绝对不要使用 <answer> 或 </answer> 这种 XML 标签来包裹答案！直接输出纯文本。
+                        2. 所有的多行公式推导（如 \\begin{{aligned}}...\\end{{aligned}}）必须且只能用 $$ 包裹在最外层！不要让 \\begin 裸奔！
+                        3. 正确格式示范：
+                        $$
+                        \\begin{{aligned}}
+                        \\int x dx &= \\frac{{1}}{{2}}x^2 + C \\\\
+                        \\end{{aligned}}
+                        $$
                         """
                         
                         response = vision_client.chat.completions.create(
@@ -391,7 +387,12 @@ with tab_solver:
                                 ]
                             }]
                         )
+                        
+                        # 💥 【清洗过滤网】：强行干掉 AI 发疯时可能带上的标签
+                        raw_ans = response.choices[0].message.content
+                        clean_ans = raw_ans.replace("<answer>", "").replace("</answer>", "").replace("```latex", "").replace("```", "").strip()
+                        
                         st.success("解答完成！以下是详细步骤：")
-                        st.markdown(response.choices[0].message.content)
+                        st.markdown(clean_ans)
                     except Exception as e:
                         st.error(f"解析失败，请检查配置。")

@@ -21,6 +21,108 @@ client = OpenAI(
 # ==========================================
 with st.sidebar:
     st.title("♾️ 拓扑One")
+    # ==========================================
+# 🌟 视觉增强：Apple Bento Box (苹果便当盒) 核心功能海报
+# ==========================================
+st.markdown("""
+<style>
+/* 定义便当盒外层网格 */
+.bento-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4列等宽 */
+    grid-template-rows: repeat(2, 160px);  /* 2行固定高度 */
+    gap: 16px; /* 卡片之间的间距 */
+    margin-bottom: 30px;
+    margin-top: 20px;
+}
+/* 定义每一个独立的小盒子 */
+.bento-box {
+    background: #fbfbfd;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-content: space-between;
+    flex-direction: column;
+    border: 1px solid #e5e5ea;
+    overflow: hidden;
+    position: relative;
+}
+/* 鼠标悬停时的动态浮起效果 */
+.bento-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+/* 左侧超大盒子：占据2列2行 */
+.box-large {
+    grid-column: span 2;
+    grid-row: span 2;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+/* 右上角宽盒子：占据2列1行 */
+.box-wide {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+}
+/* 字体样式定制 */
+.bento-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+}
+.bento-desc {
+    font-size: 13px;
+    color: #86868b;
+    line-height: 1.4;
+}
+.large-title {
+    font-size: 36px;
+    font-weight: 800;
+    background: -webkit-linear-gradient(45deg, #0071e3, #42a1f5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+/* 装饰性大图标 */
+.bg-icon {
+    position: absolute;
+    right: -10px;
+    bottom: -20px;
+    font-size: 80px;
+    opacity: 0.1;
+}
+</style>
+
+<div class="bento-container">
+    <div class="bento-box box-large">
+        <div class="large-title">♾️ 拓扑One</div>
+        <div class="bento-desc" style="font-size: 16px;">专为数学专业打造的<br>自适应科研与学习引擎</div>
+    </div>
+    
+    <div class="bento-box box-wide">
+        <div class="bento-title">∑ 多模态 LaTeX 极速识别</div>
+        <div class="bento-desc">搭载视觉大模型，复杂数学公式拍照秒转标准代码，告别排版焦虑。</div>
+        <div class="bg-icon">📸</div>
+    </div>
+    
+    <div class="bento-box">
+        <div class="bento-title">📈 动态模型</div>
+        <div class="bento-desc">SDE、布朗运动<br>参数级实时渲染</div>
+        <div class="bg-icon">🎲</div>
+    </div>
+    
+    <div class="bento-box">
+        <div class="bento-title">🏆 CUMCM</div>
+        <div class="bento-desc">数模竞赛国奖<br>专属备考路线</div>
+        <div class="bg-icon">🏅</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
     st.markdown("面向数学与统计学专业的深度学习辅助系统")
     st.divider()
     

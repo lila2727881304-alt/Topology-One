@@ -71,6 +71,7 @@ with st.sidebar:
 # ==========================================
 # 主页面：海报与四标签页架构
 # ==========================================
+# 🌟 视觉增强：极简版 Apple Bento Box (只留标题，完美居中)
 st.markdown("""
 <style>
 .bento-container {
@@ -88,11 +89,13 @@ st.markdown("""
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* 水平居中 */
+    align-items: center;     /* 垂直居中 */
     flex-direction: column;
     border: 1px solid #e5e5ea;
     overflow: hidden;
     position: relative;
+    text-align: center;
 }
 .bento-box:hover {
     transform: translateY(-5px);
@@ -102,39 +105,23 @@ st.markdown("""
     grid-column: span 2;
     grid-row: span 2;
     background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-    justify-content: center;
-    align-items: center;
-    text-align: center;
 }
 .box-wide {
     grid-column: span 2;
     background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
 }
 .bento-title {
-    font-size: 18px;
+    font-size: 22px; /* 加大字号 */
     font-weight: 700;
     color: #1d1d1f;
-    margin-bottom: 8px;
-}
-.bento-desc {
-    font-size: 13px;
-    color: #86868b;
-    line-height: 1.4;
 }
 .large-title {
-    font-size: 36px;
+    font-size: 42px; /* 加大主标题字号 */
     font-weight: 800;
     background: -webkit-linear-gradient(45deg, #0071e3, #42a1f5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 10px;
-}
-.bg-icon {
-    position: absolute;
-    right: -10px;
-    bottom: -20px;
-    font-size: 80px;
-    opacity: 0.1;
+    margin-bottom: 5px;
 }
 @keyframes spin3D {
     0% { transform: rotateY(0deg); }
@@ -150,22 +137,16 @@ st.markdown("""
 <div class="bento-container">
     <div class="bento-box box-large">
         <div class="large-title"><span class="rotate-logo">♾️</span> 拓扑One</div>
-        <div class="bento-desc" style="font-size: 16px;">专为数学专业打造的<br>自适应科研与学习引擎</div>
+        <div style="font-size: 16px; color: #86868b; font-weight: 500;">自适应科研与学习引擎</div>
     </div>
     <div class="bento-box box-wide">
         <div class="bento-title">∑ 多模态 LaTeX 极速识别</div>
-        <div class="bento-desc">搭载视觉大模型，复杂数学公式拍照秒转标准代码，告别排版焦虑。</div>
-        <div class="bg-icon">📸</div>
     </div>
     <div class="bento-box">
         <div class="bento-title">📈 动态模型</div>
-        <div class="bento-desc">SDE、布朗运动<br>参数级实时渲染</div>
-        <div class="bg-icon">🎲</div>
     </div>
     <div class="bento-box">
         <div class="bento-title">🏆 CUMCM</div>
-        <div class="bento-desc">数模竞赛国奖<br>专属备考路线</div>
-        <div class="bg-icon">🏅</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -315,7 +296,7 @@ with tab_course:
         st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传至仓库。")
 
 # ------------------------------------------
-# 标签页 4：拍照搜题 (终极多模型编排架构版)
+# 标签页 4：拍照搜题 (多模型联合接力解题)
 # ------------------------------------------
 with tab_solver:
     st.markdown("### 📸 拓扑One 核心矿山：多模型联合解题系统")
@@ -356,7 +337,6 @@ with tab_solver:
         if solve_image is not None:
             if st.button("✨ 提交并启动联合解码解答", type="primary", use_container_width=True):
                 
-                # 初始化状态显示
                 status_placeholder = st.empty()
                 
                 try:
@@ -368,7 +348,6 @@ with tab_solver:
                         base_url="https://open.bigmodel.cn/api/paas/v4/"
                     )
                     
-                    # ======= 第一棒：视觉模型只做 OCR 提取，不许做题 =======
                     status_placeholder.info("👁️ 正在调用视觉模型 (GLM-4V) 提取图像中的数学特征...")
                     
                     ocr_prompt = "请仅仅提取图片中的数学题目公式，将其转换为标准的一行 LaTeX 代码。绝对不要尝试解答这道题，不要任何说明文字，只要代码本身。"
@@ -383,10 +362,8 @@ with tab_solver:
                         }]
                     )
                     
-                    # 拿到干净的公式代码
                     equation_latex = ocr_response.choices[0].message.content.replace("```latex", "").replace("```", "").replace("<answer>", "").replace("</answer>", "").strip()
                     
-                    # ======= 第二棒：数学大脑 DeepSeek 根据代码做题 =======
                     status_placeholder.success(f"✅ 提取成功！识别方程为: $ {equation_latex} $ \n\n🧠 正在交由 DeepSeek 数学逻辑引擎进行深度推导...")
                     
                     solve_prompt = f"""你是一名资深的大学数学教授，精通【{st.session_state.solver_mode}】。
@@ -412,7 +389,6 @@ with tab_solver:
                     
                     clean_ans = solve_response.choices[0].message.content.replace("<answer>", "").replace("</answer>", "").strip()
                     
-                    # 清除状态，展示最终完美答案
                     status_placeholder.empty()
                     st.success("解答完成！以下是数学逻辑引擎的推导步骤：")
                     st.markdown(clean_ans)

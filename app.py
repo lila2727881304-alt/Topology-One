@@ -8,6 +8,15 @@ import pandas as pd
 st.set_page_config(page_title="拓扑One智能体", page_icon="♾️", layout="wide")
 
 # ==========================================
+# 客户端初始化 (移至前端以便全局调用)
+# ==========================================
+# DeepSeek 客户端（用于回答数学问题）
+client = OpenAI(
+    api_key=st.secrets["DEEPSEEK_KEY"], 
+    base_url="https://api.deepseek.com"
+)
+
+# ==========================================
 # 侧边栏：资源导航与 LaTeX 识别工具
 # ==========================================
 with st.sidebar:
@@ -25,50 +34,56 @@ with st.sidebar:
     
     st.divider()
     
-    # 模块：LaTeX公式识别 (安全性修改版)
+    # 模块：核心功能
     st.subheader("💡 核心功能")
     st.markdown("- 📦 **课程与教材库**")
     
+    # 功能 A：LaTeX识别
     with st.expander("∑ LaTeX公式识别 (点击上传图片)"):
-        # 【安全修改 1】：从 Streamlit 云端保险箱读取智谱密钥
         zhipu_api_key = st.secrets["ZHIPU_KEY"]
-        
-        uploaded_image = st.file_uploader("支持截图或拍照上传", type=["png", "jpg", "jpeg"])
+        uploaded_image = st.file_uploader("支持截图或拍照上传", type=["png", "jpg", "jpeg"], key="sidebar_latex")
         
         if uploaded_image is not None:
             st.image(uploaded_image, caption="待识别公式预览") 
             if st.button("✨ 开启真实识别"):
-                with st.spinner("系统正在利用视觉模型解析图片..."):
+                with st.spinner("正在解析图片..."):
                     try:
                         img_data = uploaded_image.getvalue()
                         base64_image = base64.b64encode(img_data).decode('utf-8')
-                        
                         vision_client = OpenAI(
                             api_key=zhipu_api_key,
                             base_url="https://open.bigmodel.cn/api/paas/v4/"
                         )
-                        
                         response = vision_client.chat.completions.create(
                             model="glm-4v",
-                            messages=[
-                                {
-                                    "role": "user",
-                                    "content": [
-                                        {"type": "text", "text": "你是一个专业的数学排版专家。请提取图片中的全部数学公式并转换为标准的LaTeX代码。仅输出代码，不要任何解释。"},
-                                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                                    ]
-                                }
-                            ]
+                            messages=[{
+                                "role": "user",
+                                "content": [
+                                    {"type": "text", "text": "提取图片中的全部数学公式并转换为LaTeX代码。仅输出代码。"},
+                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                                ]
+                            }]
                         )
-                        
-                        real_latex = response.choices[0].message.content
-                        st.success("解析成功！")
-                        st.code(real_latex, language="latex")
-                    except Exception as e:
-                        st.error(f"识别出错，请确认云端 Secrets 配置正确。")
+                        st.code(response.choices[0].message.content, language="latex")
+                    except:
+                        st.error("识别出错，请检查配置。")
 
-    st.markdown("- 🧠 **概念深度解析**")
-    st.markdown("- 🔗 **一站式平台聚合**")
+    # 功能 B：随机微分方程概念解析 (新增互动框)
+    with st.expander("📚 讲解随机微分方程基本概念"):
+        concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
+        if concept_query:
+            with st.spinner("正在查询专业解析..."):
+                try:
+                    sde_response = client.chat.completions.create(
+                        model="deepseek-chat",
+                        messages=[
+                            {"role": "system", "content": "你是一位精通随机微分方程（SDE）的数学教授，请用专业且易懂的语言解释用户提出的概念。"},
+                            {"role": "user", "content": f"请详细讲解随机微分方程中的这个概念：{concept_query}"}
+                        ]
+                    )
+                    st.info(sde_response.choices[0].message.content)
+                except:
+                    st.error("解析失败，请检查 API 配置。")
     
     st.divider()
     st.caption("让科研更高效，让学习更快乐！")
@@ -78,12 +93,6 @@ with st.sidebar:
 # ==========================================
 st.title("♾️ 拓扑One - 智慧数学学伴AI")
 st.caption("专为数学专业大学生打造的自适应学业规划与科研辅助系统。")
-
-# 【安全修改 2】：从 Streamlit 云端保险箱读取 DeepSeek 密钥
-client = OpenAI(
-    api_key=st.secrets["DEEPSEEK_KEY"], 
-    base_url="https://api.deepseek.com"
-)
 
 tab_chat, tab_visual, tab_course = st.tabs(["💬 智能问答", "📈 模型可视化演示", "📚 课程资源检索库"])
 
@@ -99,8 +108,8 @@ with tab_chat:
     with col1:
         if st.button("🔍 查询大二上学期《拓扑学》推荐教材", use_container_width=True):
             st.session_state.quick_prompt = "请帮我查询数学专业大二上学期《拓扑学》的经典推荐教材，并给出学习该课程的重点建议。"
-        if st.button("📈 讲解随机微分方程基础概念", use_container_width=True):
-            st.session_state.quick_prompt = "请深入浅出地讲解随机微分方程（SDE）的基础知识，以及它在金融数学或物理中的应用背景。"
+        if st.button("🧪 讲解随机微分方程的基本概念", use_container_width=True):
+            st.session_state.quick_prompt = "请概括性地讲解随机微分方程（SDE）的基本概念、核心思想以及它在金融或物理中的主要用途。"
     
     with col2:
         if st.button("🧠 从《数学分析》到《实变函数》怎么过渡？", use_container_width=True):
@@ -112,7 +121,7 @@ with tab_chat:
 
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "你好！我是你的**拓扑One**导师。无论是拓扑学难点、随机过程公式，还是科研论文排版，我都能为你提供专业的指导。今天想探讨什么？"}
+            {"role": "assistant", "content": "你好！我是你的**拓扑One**导师。今天想探讨什么？"}
         ]
 
     for msg in st.session_state.messages:
@@ -139,11 +148,11 @@ with tab_chat:
                     ai_answer = response.choices[0].message.content
                     st.markdown(ai_answer)
                     st.session_state.messages.append({"role": "assistant", "content": ai_answer})
-                except Exception as e:
-                    st.error(f"对话失败。请检查云端 Secrets 密钥配置。")
+                except:
+                    st.error("对话失败。请检查 API 配置。")
 
 # ------------------------------------------
-# 标签页 2：模型可视化
+# 标签页 2：模型可视化 (保持不变)
 # ------------------------------------------
 with tab_visual:
     st.markdown("### 📊 数学模型动态可视化")
@@ -176,7 +185,7 @@ with tab_visual:
                     st.line_chart(pd.DataFrame(S, columns=["资产价格 (S_t)"]))
 
 # ------------------------------------------
-# 标签页 3：数据库检索
+# 标签页 3：数据库检索 (保持不变)
 # ------------------------------------------
 with tab_course:
     st.markdown("### 📚 结构化课程与教材数据库")
@@ -200,4 +209,4 @@ with tab_course:
             "网课链接（推荐）": st.column_config.LinkColumn("网课资源")
         })
     except:
-        st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传至仓库。")
+        st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传。")

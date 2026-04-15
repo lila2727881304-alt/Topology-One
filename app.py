@@ -6,7 +6,7 @@ import pandas as pd
 import time
 
 # 1. 页面全局配置
-st.set_page_config(page_title="♾️拓扑One智能体", page_icon="♾️", layout="wide")
+st.set_page_config(page_title="拓扑One智能体", page_icon="♾️", layout="wide")
 
 # ==========================================
 # 客户端初始化 (移至前端以便全局调用)
@@ -71,29 +71,29 @@ with st.sidebar:
 # ==========================================
 # 主页面：超极简高级横幅与四标签页架构
 # ==========================================
-# 🌟 视觉增强：超极简横幅 (Hero Banner)
+# 🌟 视觉增强：超极简窄横幅 (带旋转 Logo)
 st.markdown("""
 <style>
 .hero-banner {
     background: linear-gradient(135deg, #fbfbfd 0%, #f0f4f8 100%);
-    border-radius: 24px;
-    padding: 40px 20px;
-    margin-top: 10px;
-    margin-bottom: 30px;
+    border-radius: 16px;
+    padding: 15px 20px; /* 大幅减小上下高度 */
+    margin-top: 0px;
+    margin-bottom: 25px;
     text-align: center;
     border: 1px solid #e5e5ea;
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 .hero-title {
-    font-size: 48px; 
+    font-size: 38px; /* 字号稍微收敛一点，配合窄横幅 */
     font-weight: 800;
     background: -webkit-linear-gradient(45deg, #0071e3, #42a1f5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 10px;
+    margin-bottom: 4px;
 }
 .hero-subtitle {
-    font-size: 18px;
+    font-size: 15px;
     color: #86868b;
     font-weight: 500;
     letter-spacing: 1px;

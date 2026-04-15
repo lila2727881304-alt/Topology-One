@@ -67,23 +67,6 @@ with st.sidebar:
                         st.code(response.choices[0].message.content, language="latex")
                     except:
                         st.error("识别出错，请检查配置。")
-
-    # 功能 B：随机微分方程概念解析 (新增互动框)
-    with st.expander("📚 讲解随机微分方程基本概念"):
-        concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
-        if concept_query:
-            with st.spinner("正在查询专业解析..."):
-                try:
-                    sde_response = client.chat.completions.create(
-                        model="deepseek-chat",
-                        messages=[
-                            {"role": "system", "content": "你是一位精通随机微分方程（SDE）的数学教授，请用专业且易懂的语言解释用户提出的概念。"},
-                            {"role": "user", "content": f"请详细讲解随机微分方程中的这个概念：{concept_query}"}
-                        ]
-                    )
-                    st.info(sde_response.choices[0].message.content)
-                except:
-                    st.error("解析失败，请检查 API 配置。")
     
     st.divider()
     st.caption("让科研更高效，让学习更快乐！")
@@ -105,23 +88,37 @@ with tab_chat:
         st.session_state.quick_prompt = None
 
     col1, col2 = st.columns(2)
+    
+    # 左侧列：保留两个固定的快捷问题按钮
     with col1:
         if st.button("🔍 查询大二上学期《拓扑学》推荐教材", use_container_width=True):
             st.session_state.quick_prompt = "请帮我查询数学专业大二上学期《拓扑学》的经典推荐教材，并给出学习该课程的重点建议。"
-        if st.button("🧪 讲解随机微分方程的基本概念", use_container_width=True):
-            st.session_state.quick_prompt = "请概括性地讲解随机微分方程（SDE）的基本概念、核心思想以及它在金融或物理中的主要用途。"
-    
-    with col2:
         if st.button("🧠 从《数学分析》到《实变函数》怎么过渡？", use_container_width=True):
             st.session_state.quick_prompt = "请从核心思想的角度，讲解如何从数学分析平滑过渡到实变函数学习。"
-        if st.button("📐 解析拉格朗日中值定理的几何意义", use_container_width=True):
-            st.session_state.quick_prompt = "请结合几何直观和物理背景，多维度解析拉格朗日中值定理及其应用。"
+    
+    # 右侧列：替换为可以自主输入概念的展开框
+    with col2:
+        with st.expander("📚 讲解基本概念"):
+            concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
+            if concept_query:
+                with st.spinner("正在查询专业解析..."):
+                    try:
+                        sde_response = client.chat.completions.create(
+                            model="deepseek-chat",
+                            messages=[
+                                {"role": "system", "content": "你是一位精通数学各个方向的数学教授，请用专业且易懂的语言解释用户提出的概念。"},
+                                {"role": "user", "content": f"请详细讲解这个概念：{concept_query}"}
+                            ]
+                        )
+                        st.info(sde_response.choices[0].message.content)
+                    except:
+                        st.error("解析失败，请检查 API 配置。")
 
     st.divider()
 
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "你好！我是你的**拓扑One**导师。今天想探讨什么？"}
+            {"role": "assistant", "content": "你好！我是你的**拓扑One**导师。无论是拓扑学难点、随机过程公式，还是科研论文排版，我都能为你提供专业的指导。今天想探讨什么？"}
         ]
 
     for msg in st.session_state.messages:
@@ -152,7 +149,7 @@ with tab_chat:
                     st.error("对话失败。请检查 API 配置。")
 
 # ------------------------------------------
-# 标签页 2：模型可视化 (保持不变)
+# 标签页 2：模型可视化
 # ------------------------------------------
 with tab_visual:
     st.markdown("### 📊 数学模型动态可视化")
@@ -185,7 +182,7 @@ with tab_visual:
                     st.line_chart(pd.DataFrame(S, columns=["资产价格 (S_t)"]))
 
 # ------------------------------------------
-# 标签页 3：数据库检索 (保持不变)
+# 标签页 3：数据库检索
 # ------------------------------------------
 with tab_course:
     st.markdown("### 📚 结构化课程与教材数据库")
@@ -209,4 +206,4 @@ with tab_course:
             "网课链接（推荐）": st.column_config.LinkColumn("网课资源")
         })
     except:
-        st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传。")
+        st.error("数据文件加载失败，请确保 '课程信息表 (1).csv' 已上传至仓库。")

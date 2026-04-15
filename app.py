@@ -96,9 +96,7 @@ with tab_chat:
         if st.button("🧠 从《数学分析》到《实变函数》怎么过渡？", use_container_width=True):
             st.session_state.quick_prompt = "请从核心思想的角度，讲解如何从数学分析平滑过渡到实变函数学习。"
     
-    # 右侧列：替换为可以自主输入概念的展开框
-    with col2:
-        with st.expander("📚 讲解基本概念"):
+  with st.expander("📚 讲解基本概念"):
             concept_query = st.text_input("输入你想了解的概念（如：伊藤引理）", placeholder="输入后回车...")
             if concept_query:
                 with st.spinner("正在查询专业解析..."):
@@ -106,8 +104,14 @@ with tab_chat:
                         sde_response = client.chat.completions.create(
                             model="deepseek-chat",
                             messages=[
-                                {"role": "system", "content": "你是一位精通数学各个方向的数学教授，请用专业且易懂的语言解释用户提出的概念。"},
-                                {"role": "user", "content": f"请详细讲解这个概念：{concept_query}"}
+                                {
+                                    "role": "system", 
+                                    "content": "你是一个名为'拓扑One'的专业数学AI学伴。请直接给出严谨、通俗的解答，绝对不要使用任何诸如'作为一名数学教授'或'我很乐意为你解答'之类的开场白废话。重要格式要求：所有数学公式必须严格使用 Markdown 的 LaTeX 语法，行内公式用单个 $ 包裹（例如 $f(x)$），独立公式用双 $$ 包裹。绝对禁止使用 \\( \\) 或 \\[ \\] 格式输出公式。"
+                                },
+                                {
+                                    "role": "user", 
+                                    "content": f"请详细且精炼地讲解这个概念：{concept_query}"
+                                }
                             ]
                         )
                         st.info(sde_response.choices[0].message.content)

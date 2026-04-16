@@ -27,7 +27,7 @@ with st.sidebar:
     st.subheader("💡 核心功能")
     st.markdown("- 📦 **课程与教材库**")
     
-    with st.expander("∑ LaTeX公式识别 (点击上传图片)"):
+    with st.expander("LaTeX公式识别 (点击上传图片)"):
         zhipu_api_key = st.secrets["ZHIPU_KEY"]
         uploaded_image = st.file_uploader("支持截图或拍照上传", type=["png", "jpg", "jpeg"], key="sidebar_latex")
         
@@ -263,7 +263,7 @@ with tab_course:
 # 标签页 4：拍照搜题 (多模型联合接力解题)
 # ------------------------------------------
 with tab_solver:
-    st.markdown("### 📸 拓扑One 核心矿山：多模型联合解题系统")
+    st.markdown("### 高数计算器 ")
     
     if "solver_mode" not in st.session_state:
         st.session_state.solver_mode = None
